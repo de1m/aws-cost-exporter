@@ -2,7 +2,7 @@
 
 This is a [prometheus exporter](https://prometheus.io/docs/instrumenting/exporters/) to show daily cost of aws services
 
-## Collted information
+## Collected information
 
 1. All services together in all regions (TYPE cost_all)
 ```
@@ -31,6 +31,8 @@ cost_service{type="service",service="AWS Key Management Service",region="eu-west
 ```
 
 # AWS Permissions
+Your user need following permissions
+
 - read information from Billing
 - read cost of all services
 - read cost of all regions
