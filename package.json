@@ -1,0 +1,23 @@
+{
+  "name": "aws-cost",
+  "version": "0.0.1",
+  "description": "AWS Billing",
+  "main": "app.js",
+  "scripts": {
+    "test": "node app.js"
+  },
+  "keywords": [
+    "aws",
+    "billing"
+  ],
+  "author": "a.walker",
+  "license": "MIT",
+  "dependencies": {
+    "aws-sdk": "^2.587.0",
+    "cron": "^1.7.2",
+    "express": "^4.17.1",
+    "log4js": "^6.1.0",
+    "node-cache": "^5.1.0",
+    "prom-client": "^11.5.3"
+  }
+}
