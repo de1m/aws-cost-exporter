@@ -39,7 +39,7 @@ metricCollector.prototype.collectMetrics = async function () {
             try {
                 var metricsCollted = await getMetrics();
                 if (metricsCollted) {
-                    
+
                 } else {
                     return err;
                 }
@@ -52,7 +52,7 @@ metricCollector.prototype.collectMetrics = async function () {
 
     if (cached.get('initRun') == undefined) {
         var metricsAll = await getMetrics();
-        if(metricsAll){
+        if (metricsAll) {
             logger.info('Metrics was collected');
             jobRun();
         } else {
@@ -68,19 +68,19 @@ metricCollector.prototype.collectMetrics = async function () {
 var getMetrics = async function () {
 
     var regionsAllAct = await costExp.getActiveRegions(); //get monthly cost, check active regions
-    var serviceAllAct = await costExp.getActiveServices(); //Get monthly cost, check active services
+    // var serviceAllAct = await costExp.getActiveServices(); //Get monthly cost, check active services
     var allCostDaily = await costExp.getAllCostDaily();
-    
-    //cost_all{type="all"} 1655.8311381101
-    costAllUSD.labels('all', allCostDaily.ResultsByTime[0].Total.UnblendedCost.Unit).set(parseFloat(allCostDaily.ResultsByTime[0].Total.UnblendedCost.Amount,10));
+
+    // cost_all{type="all"} 1655.8311381101
+    costAllUSD.labels('all', allCostDaily.ResultsByTime[0].Total[metricConfig.metrictype].Unit).set(parseFloat(allCostDaily.ResultsByTime[0].Total[metricConfig.metrictype].Amount, 10));
 
     //check if env var AWS_SERVICES was set, if yes spit the input in an array
-    if(metricConfig.services == 'all'){
+    if (metricConfig.services == 'all') {
         var servicesToRead = serviceAllAct.DimensionValues
     } else {
         var servicesToReadArr = metricConfig.services.split(',');
         var servicesToRead = [];
-        for(var i = 0; i < servicesToReadArr.length; i++){
+        for (var i = 0; i < servicesToReadArr.length; i++) {
             servicesToRead.push({
                 Value: servicesToReadArr[i]
             })
@@ -88,12 +88,12 @@ var getMetrics = async function () {
     }
 
     //check if env var AWS_REGIONS was set, if yes spit the input in an array
-    if(metricConfig.regions == 'all'){
+    if (metricConfig.regions == 'all') {
         var regionsToRead = regionsAllAct
     } else {
         var regionsToReadArr = metricConfig.regions.split(',');
         var regionsToRead = [];
-        for(var i = 0; i < regionsToReadArr.length; i++){
+        for (var i = 0; i < regionsToReadArr.length; i++) {
             regionsToRead.push({
                 region: regionsToReadArr[i]
             })
@@ -101,57 +101,61 @@ var getMetrics = async function () {
     }
 
     //get cost by region
-    for (var i = 0; i < regionsToRead.length; i++) {
-        var region = regionsToRead[i];
-        var regiondailyCost = await costExp.getCostPerRegionDaily(region.region)
+    if (metricConfig.filter == 'region' || metricConfig.filter == 'all') {
+        for (var i = 0; i < regionsToRead.length; i++) {
+            var region = regionsToRead[i];
+            var regiondailyCost = await costExp.getCostPerRegionDaily(region.region)
 
-        //get all regions, where cost was bigger then $0.0001
-        if (Number(regiondailyCost.ResultsByTime[0].Total.UnblendedCost.Amount) > 0.0001) {
-            var currencyUnit = regiondailyCost.ResultsByTime[0].Total.UnblendedCost.Unit;
-            var total = regiondailyCost.ResultsByTime[0].Total.UnblendedCost.Amount; 
-            
-            //exmp: cost_region{type='region', service='all', region='eu-north-1', unit='usd'} 296.7056863111
-            costByRegion.labels('region', 'all', region.region, currencyUnit).set(parseFloat(total, 10));
+            //get all regions, where cost was bigger then $0.0001
+            if (Number(regiondailyCost.ResultsByTime[0].Total[metricConfig.metrictype].Amount) > 0.0001) {
+                var currencyUnit = regiondailyCost.ResultsByTime[0].Total[metricConfig.metrictype].Unit;
+                var total = regiondailyCost.ResultsByTime[0].Total[metricConfig.metrictype].Amount;
 
-            for (var y = 0; y < servicesToRead.length; y++) {
-                var service = servicesToRead[y]
+                //exmp: cost_region{type='region', service='all', region='eu-north-1', unit='usd'} 296.7056863111
+                costByRegion.labels('region', 'all', region.region, currencyUnit).set(parseFloat(total, 10));
 
-                var serviceCostDaily = await costExp.getCostRegionServiceDaily(region.region, service.Value);
+                for (var y = 0; y < servicesToRead.length; y++) {
+                    var service = servicesToRead[y]
 
-                //get all services, where cost was bigger then $0.0001
-                if (Number(serviceCostDaily.ResultsByTime[0].Total.UnblendedCost.Amount) > 0.0001) {
-                    var serviceTotal = serviceCostDaily.ResultsByTime[0].Total.UnblendedCost.Amount;
+                    var serviceCostDaily = await costExp.getCostRegionServiceDaily(region.region, service.Value);
 
-                    costByRegion.labels('region', service.Value, region.region, currencyUnit).set(parseFloat(serviceTotal, 10));
+                    //get all services, where cost was bigger then $0.0001
+                    if (Number(serviceCostDaily.ResultsByTime[0].Total[metricConfig.metrictype].Amount) > 0.0001) {
+                        var serviceTotal = serviceCostDaily.ResultsByTime[0].Total[metricConfig.metrictype].Amount;
+
+                        costByRegion.labels('region', service.Value, region.region, currencyUnit).set(parseFloat(serviceTotal, 10));
+                    }
                 }
             }
         }
     }
 
-    //get cost by service
-    for (var i = 0; i < servicesToRead.length; i++) {
-        var service = servicesToRead[i]
-        var serviceCostDaily = await costExp.getCostPerServiceDaily(service.Value);
+    // //get cost by service
+    if (metricConfig.filter == 'service' || metricConfig.filter == 'all') {
+        for (var i = 0; i < servicesToRead.length; i++) {
+            var service = servicesToRead[i]
+            var serviceCostDaily = await costExp.getCostPerServiceDaily(service.Value);
 
-        //get all services, where cost was bigger then $0.0001
-        if (Number(serviceCostDaily.ResultsByTime[0].Total.UnblendedCost.Amount) > 0.0001) {
-            var currencyUnit = serviceCostDaily.ResultsByTime[0].Total.UnblendedCost.Unit
-            var total = serviceCostDaily.ResultsByTime[0].Total.UnblendedCost.Amount //daily cost of service
+            //get all services, where cost was bigger then $0.0001
+            if (Number(serviceCostDaily.ResultsByTime[0].Total[metricConfig.metrictype].Amount) > 0.0001) {
+                var currencyUnit = serviceCostDaily.ResultsByTime[0].Total[metricConfig.metrictype].Unit
+                var total = serviceCostDaily.ResultsByTime[0].Total[metricConfig.metrictype].Amount //daily cost of service
 
-            //exmp: cost_service{type='service', service='AWS Secrets Manager', region='all', unit='usd'} 2.1215026336
-            costByService.labels('service', service.Value, 'all', currencyUnit).set(parseFloat(total, 10));
+                //exmp: cost_service{type='service', service='AWS Secrets Manager', region='all', unit='usd'} 2.1215026336
+                costByService.labels('service', service.Value, 'all', currencyUnit).set(parseFloat(total, 10));
 
-            for (var y = 0; y < regionsToRead.length; y++) {
-                var region = regionsToRead[y]
+                for (var y = 0; y < regionsToRead.length; y++) {
+                    var region = regionsToRead[y]
 
-                var regionCostDaily = await costExp.getCostRegionServiceDaily(region.region, service.Value)
-                
-                //get all regions, where cost was bigger then $0.0001
-                if (Number(regionCostDaily.ResultsByTime[0].Total.UnblendedCost.Amount) > 0.0001) {
-                    var regionTotal = regionCostDaily.ResultsByTime[0].Total.UnblendedCost.Amount;
+                    var regionCostDaily = await costExp.getCostRegionServiceDaily(region.region, service.Value)
 
-                    //exmp: cost_service{type='service', service='AWS Secrets Manager', region='eu-north-1', unit='usd'} 0.466095752
-                    costByService.labels('service', service.Value, region.region, currencyUnit).set(parseFloat(regionTotal, 10));
+                    //get all regions, where cost was bigger then $0.0001
+                    if (Number(regionCostDaily.ResultsByTime[0].Total[metricConfig.metrictype].Amount) > 0.0001) {
+                        var regionTotal = regionCostDaily.ResultsByTime[0].Total[metricConfig.metrictype].Amount;
+
+                        //exmp: cost_service{type='service', service='AWS Secrets Manager', region='eu-north-1', unit='usd'} 0.466095752
+                        costByService.labels('service', service.Value, region.region, currencyUnit).set(parseFloat(regionTotal, 10));
+                    }
                 }
             }
         }
@@ -159,7 +163,7 @@ var getMetrics = async function () {
 
     // //set true, if first running was okay
     cached.set('initRun', true);
-    
+
     //save metric strings into cached
     cached.set('metrics', Prometheus.register.metrics())
 

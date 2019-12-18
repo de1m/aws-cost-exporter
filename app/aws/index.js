@@ -2,9 +2,44 @@ var AWS = require('aws-sdk');
 var logger = require('../logger');
 var config = require('../config');
 var awsConfig = config.getAWSConfig();
+var metricConfig = config.getMetricConfig();
+
+//check the aws credentions - webtoken or simply aws key and secret key
+if (awsConfig.provider != 'unset') {
+    if (awsConfig.provider == 'AWS') {
+        logger.debug("AWS native auth");
+        AWS.config = new AWS.Config();
+        AWS.config.region = awsConfig.region;
+    } else {
+        logger.error("Env variable is set, but it's not AWS. Exit");
+        process.exit(1);
+    }
+
+} else {
+
+    logger.debug("AWS key auth");
+
+    AWS.config = new AWS.Config();
+    AWS.config.region = awsConfig.region;
+
+    if (process.env.AWS_ACCESSKEYID) {
+        AWS.config.accessKeyId = awsConfig.accessKeyId;
+    } else {
+        logger.error("ENV var AWS_ACCESSKEYID not found");
+        process.exit(1);
+    }
+    if (process.env.AWS_SECRETACCESSKEY) {
+        AWS.config.secretAccessKey = awsConfig.secretAccessKey;
+    } else {
+        logger.error("ENV var AWS_SECRETACCESSKEY not found");
+        process.exit(1);
+    }
+
+}
+
 
 //get all cost of a day
-var getAllCostDaily = async function() {
+var getAllCostDaily = async function () {
 
     //get timerage between today and last day
     var days = 1;
@@ -20,7 +55,7 @@ var getAllCostDaily = async function() {
             "End": todayDate
         },
         Granularity: 'DAILY',
-        Metrics: ['UnblendedCost']
+        Metrics: [metricConfig.metrictype]
     };
 
     return new Promise(async (resolve, reject) => {
@@ -39,11 +74,6 @@ var getAllCostDaily = async function() {
 var getRegions = async function () {
 
     return new Promise(async (resolve, reject) => {
-
-        AWS.config = new AWS.Config();
-        AWS.config.region = awsConfig.region;
-        AWS.config.accessKeyId = awsConfig.accessKeyId;
-        AWS.config.secretAccessKey = awsConfig.secretAccessKey;
 
         var regions = new AWS.EC2
         regions.describeRegions('', function (err, data) {
@@ -89,9 +119,6 @@ var getActiveServices = async function () {
         catch (err) {
             reject(err)
         }
-
-
-
     })
 }
 
@@ -108,7 +135,7 @@ var checkRegionCost = async function (regionName) {
             "End": todayDate
         },
         Granularity: 'MONTHLY',
-        Metrics: ['UnblendedCost'],
+        Metrics: [metricConfig.metrictype],
         Filter: {
             "Dimensions": {
                 "Key": "REGION",
@@ -119,11 +146,10 @@ var checkRegionCost = async function (regionName) {
     return new Promise(async (resolve, reject) => {
         try {
             var output = await getAWSCostApi(params);
-
             resolve({
                 'region': regionName,
-                'amount': output.ResultsByTime[0].Total.UnblendedCost.Amount,
-                'unit': output.ResultsByTime[0].Total.UnblendedCost.Unit
+                'amount': output.ResultsByTime[0].Total[metricConfig.metrictype].Amount,
+                'unit': output.ResultsByTime[0].Total[metricConfig.metrictype].Unit
             });
         }
         catch (err) {
@@ -146,11 +172,6 @@ var getServices = function () {
         },
         "Dimension": "Service"
     };
-
-    AWS.config = new AWS.Config();
-    AWS.config.region = awsConfig.region;
-    AWS.config.accessKeyId = awsConfig.accessKeyId;
-    AWS.config.secretAccessKey = awsConfig.secretAccessKey;
 
     var costexplorer = new AWS.CostExplorer();
     return new Promise((resolve, reject) => {
@@ -180,7 +201,7 @@ var getCostPerRegionDaily = function (regionName) {
             "End": todayDate
         },
         Granularity: 'DAILY',
-        Metrics: ['UnblendedCost'],
+        Metrics: [metricConfig.metrictype],
         Filter: {
             "Dimensions": {
                 "Key": "REGION",
@@ -217,7 +238,7 @@ var getCostPerServiceDaily = function (service) {
             "End": todayDate
         },
         Granularity: 'DAILY',
-        Metrics: ['UnblendedCost'],
+        Metrics: [metricConfig.metrictype],
         Filter: {
             "Dimensions": {
                 "Key": "SERVICE",
@@ -252,7 +273,7 @@ var getCostRegionServiceDaily = function (region, service) {
             "End": todayDate
         },
         Granularity: 'DAILY',
-        Metrics: ['UnblendedCost'],
+        Metrics: [metricConfig.metrictype],
         Filter: {
             //get cost from ec2 in integration
             And: [
@@ -285,11 +306,6 @@ var getCostRegionServiceDaily = function (region, service) {
 
 //aws api call
 var getAWSCostApi = function (params) {
-
-    AWS.config = new AWS.Config();
-    AWS.config.region = awsConfig.region;
-    AWS.config.accessKeyId = awsConfig.accessKeyId;
-    AWS.config.secretAccessKey = awsConfig.secretAccessKey;
 
     var costexplorer = new AWS.CostExplorer();
 

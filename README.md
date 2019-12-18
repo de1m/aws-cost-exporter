@@ -2,6 +2,17 @@
 
 This is a [prometheus exporter](https://prometheus.io/docs/instrumenting/exporters/) to show daily cost of aws services
 
+**WARNING:** It's show only cost for regions and services, where the cost was more then $0  
+
+**WARNING2**   
+It takes approximately 5 minutes to collect the data(in my case, this is depended on number of active serices and regions), so don't set the cronjob to run more often then 5min. 
+I recommendet to run with default settings.
+
+## For running in AWS EKS
+In aws eks you can use the role, with permissions that you need. 
+For this you need to create the k8s [serviceAccount](https://github.com/aws/amazon-eks-pod-identity-webhook/blob/master/README.md) with the role and then mount this to deployment.
+This role need the policy "AssumeRoleWithWebIdentity"
+
 ## Collected information
 
 1. All services together in all regions (TYPE cost_all)
@@ -33,9 +44,9 @@ cost_service{type="service",service="AWS Key Management Service",region="eu-west
 # AWS Permissions
 Your user need following permissions
 
-- read information from Billing
-- read cost of all services
-- read cost of all regions
+- ec2:describeRegions (AmazonEC2ReadOnlyAccess policy contain the permission)
+- ce:GetCostAndUsage
+- ce:GetDimensionValues
 
 # ENV Variables
  
@@ -43,11 +54,15 @@ Your user need following permissions
 **AWS_SECRETACCESSKEY**  
 **AWS_COSTREGION** - Cost Explorer api endpoint, default "us-east-1"  
 
+**PROVIDER** - type of credential, if set 'AWS', it's mean the pod running in AWS EKS and can use the credentials from k8s serviceAccount([more](https://github.com/jtblin/kube2iam)). In this case you don't need to set **AWS_ACCESSKEYID** and **AWS_SECRETACCESSKEY**
+
 **MPORT** - port of exporter, default 9232  
 **CRON** - cronjob string, default '00 00 01 * *' (Every day at 01:00 AM)  
-**CRONTIMEZONE** - timezone for cronjob, dafault 'Europe/Berlin'  
+**CRONTIMEZONE** - timezone for cronjob, default 'Europe/Berlin'  
 **AWS_SERVICES** - filter, to get cost of certain service/s (Exp: AWS Key Management Service,Amazon Elastic Block Store), default 'all'  
 **AWS_REGIONS** - filter, to get cost of certain region/s (Exp: eu-west-1,eu-north-1)  
+**AWS_FILTER** - values are 'region' or 'service', default 'all'. If set 'region' the output get only data region (show "collected information" 2) filtered  
+**AWS_METRICTYPE** - [type](https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/ce-advanced.html) of colleced metric, default 'UnblendedCost'. Possible are 'AmortizedCost, BlendedCost, NetAmortizedCost, NetUnblendedCost, NormalizedUsageAmount, UnblendedCost, and UsageQuantity'
 
 # Start
 ## with docker
@@ -60,5 +75,6 @@ docker run --name aws-exporter -p 9232:9232 -e AWS_ACCESSKEYID="XXX" -e AWS_SECR
 1. Set all env variables
 2. ```git clone git@github.com:de1m/aws-cost-exporter.git```
 3. ```npm i ```
-4. ```node app.js```
+4. ```create AWS environments variables```
+5. ```node app.js```
 

@@ -3,6 +3,7 @@ var AWSConfig = {
     accessKeyId: process.env.AWS_ACCESSKEYID || false,
     secretAccessKey: process.env.AWS_SECRETACCESSKEY || false,
     region: process.env.AWS_COSTREGION || "us-east-1",
+    provider: process.env.PROVIDER || 'unset'
 }
 
 var metricInfo = {
@@ -12,7 +13,9 @@ var metricInfo = {
     cronJob: process.env.CRON || '0 0 01 * * *',
     timeZone: process.env.CRONTIMEZONE || 'Europe/Berlin',
     services: process.env.AWS_SERVICES || 'all',
-    regions: process.env.AWS_REGIONS || 'all'
+    regions: process.env.AWS_REGIONS || 'all',
+    filter: process.env.AWS_FILTER || 'all',
+    metrictype: process.env.AWS_METRICTYPE || 'UnblendedCost'
 }
 
 function checkConfiguration(chkObj) {
