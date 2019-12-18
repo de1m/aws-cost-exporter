@@ -10,6 +10,13 @@ if (awsConfig.provider != 'unset') {
         logger.debug("AWS native auth");
         AWS.config = new AWS.Config();
         AWS.config.region = awsConfig.region;
+
+        AWS.config.getCredentials(function(err, result){
+            if(err){
+                logger.error(err);
+            }
+        })
+
     } else {
         logger.error("Env variable is set, but it's not AWS. Exit");
         process.exit(1);
