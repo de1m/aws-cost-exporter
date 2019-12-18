@@ -30,16 +30,6 @@ metricServer.prototype.startServer = function () {
       next()
     })
   
-  
-    //check config
-    config.checkAllConfig(function (err, result) {
-      if (err) {
-        logger.error(err);
-      } else {
-        logger.debug('Configuration: Metric Conf: ' + JSON.stringify(metrSrv))
-      }
-    })
-  
     app.listen(port, () => {
       logger.info('Metric server was startet on port ' + port);
     })
