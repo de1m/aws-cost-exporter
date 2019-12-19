@@ -10,10 +10,13 @@ if (awsConfig.provider != 'unset') {
         logger.debug("AWS native auth");
         AWS.config = new AWS.Config();
         AWS.config.region = awsConfig.region;
+        
+        AWS.config.credentials = new AWS.TokenFileWebIdentityCredentials();
 
         AWS.config.getCredentials(function(err, result){
             if(err){
                 logger.error(err);
+                process.exit(1);
             }
         })
 

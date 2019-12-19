@@ -61,7 +61,6 @@ Your user need following permissions
 **CRONTIMEZONE** - timezone for cronjob, default 'Europe/Berlin'  
 **AWS_SERVICES** - filter, to get cost of certain service/s (Exp: AWS Key Management Service,Amazon Elastic Block Store), default 'all'  
 **AWS_REGIONS** - filter, to get cost of certain region/s (Exp: eu-west-1,eu-north-1)  
-**AWS_FILTER** - values are 'region' or 'service', default 'all'. If set 'region' the output get only data region (show "collected information" 2) filtered  
 **AWS_METRICTYPE** - [type](https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/ce-advanced.html) of colleced metric, default 'UnblendedCost'. Possible are 'AmortizedCost, BlendedCost, NetAmortizedCost, NetUnblendedCost, NormalizedUsageAmount, UnblendedCost, and UsageQuantity'
 
 # Start

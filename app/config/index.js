@@ -14,7 +14,6 @@ var metricInfo = {
     timeZone: process.env.CRONTIMEZONE || 'Europe/Berlin',
     services: process.env.AWS_SERVICES || 'all',
     regions: process.env.AWS_REGIONS || 'all',
-    filter: process.env.AWS_FILTER || 'all',
     metrictype: process.env.AWS_METRICTYPE || 'UnblendedCost'
 }
 
