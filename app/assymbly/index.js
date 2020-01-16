@@ -1,5 +1,6 @@
 const Prometheus = require('prom-client')
 var CronJob = require('cron').CronJob;
+var cron = require('node-cron');
 var config = require('../config');
 var metricConfig = config.getMetricConfig();
 var cached = require('../cache')
@@ -35,7 +36,7 @@ function metricCollector() { }
 metricCollector.prototype.collectMetrics = async function () {
 
     var jobRun = function () {
-        new CronJob(metricConfig.cronJob, async function () {
+        cron.schedule(metricConfig.cronJob, async () => {
             try {
                 var metricsCollted = await getMetrics();
                 if (metricsCollted) {
@@ -47,7 +48,7 @@ metricCollector.prototype.collectMetrics = async function () {
             catch (err) {
                 return err
             }
-        }, null, true, metricConfig.timeZone);
+        })
     }
 
     if (cached.get('initRun') == undefined) {
@@ -56,7 +57,7 @@ metricCollector.prototype.collectMetrics = async function () {
             logger.info('Metrics was collected');
             jobRun();
         } else {
-            logger.error(metricsAll);
+            logger.error(metricsAll, 'Exit(err)');
             process.exit(1);
         }
     } else {
@@ -121,6 +122,7 @@ var getMetrics = async function () {
             })
             //exmp: cost_region{type='region', service='all', region='eu-north-1', unit='usd'} 296.7056863111
             costByRegion.labels('region', 'all', region.region, currencyUnit).set(parseFloat(total, 10));
+            logger.debug("Added metric 'region all' to cache")
 
             for (var y = 0; y < servicesToRead.length; y++) {
                 var service = servicesToRead[y]
@@ -131,6 +133,7 @@ var getMetrics = async function () {
                 if (Number(serviceCostDaily.ResultsByTime[0].Total[metricConfig.metrictype].Amount) > 0.0001) {
                     var serviceTotal = serviceCostDaily.ResultsByTime[0].Total[metricConfig.metrictype].Amount;
                     costByRegion.labels('region', service.Value, region.region, currencyUnit).set(parseFloat(serviceTotal, 10));
+                    logger.debug("Added metric 'service " + service.Value + "' for region '" + region.region + "' to cache")
                     regionArr[regCount].services[serviceCount] = {
                         total: serviceTotal,
                         unit: currencyUnit,
@@ -199,6 +202,7 @@ var getMetrics = async function () {
 
     //save metric strings into cached
     cached.set('metrics', Prometheus.register.metrics())
+    logger.debug("Added metrics to prometheus cache");
 
     return true
 }

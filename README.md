@@ -57,8 +57,7 @@ Your user need following permissions
 **PROVIDER** - type of credential, if set 'AWS', it's mean the pod running in AWS EKS and can use the credentials from k8s serviceAccount([more](https://github.com/jtblin/kube2iam)). In this case you don't need to set **AWS_ACCESSKEYID** and **AWS_SECRETACCESSKEY**
 
 **MPORT** - port of exporter, default 9232  
-**CRON** - cronjob string, default '00 00 01 * *' (Every day at 01:00 AM)  
-**CRONTIMEZONE** - timezone for cronjob, default 'Europe/Berlin'  
+**CRON** - cronjob string, default '* * 01 * *' 
 **AWS_SERVICES** - filter, to get cost of certain service/s (Exp: AWS Key Management Service,Amazon Elastic Block Store), default 'all'  
 **AWS_REGIONS** - filter, to get cost of certain region/s (Exp: eu-west-1,eu-north-1)  
 **AWS_METRICTYPE** - [type](https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/ce-advanced.html) of colleced metric, default 'UnblendedCost'. Possible are 'AmortizedCost, BlendedCost, NetAmortizedCost, NetUnblendedCost, NormalizedUsageAmount, UnblendedCost, and UsageQuantity'

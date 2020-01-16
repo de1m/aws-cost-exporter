@@ -10,8 +10,7 @@ var metricInfo = {
     name: 'metric-info',
     mport: process.env.MPORT || 9232,
     timewait: process.env.TIMEWAIT || 600,
-    cronJob: process.env.CRON || '0 0 01 * * *',
-    timeZone: process.env.CRONTIMEZONE || 'Europe/Berlin',
+    cronJob: process.env.CRON || '0 01 * * *',
     services: process.env.AWS_SERVICES || 'all',
     regions: process.env.AWS_REGIONS || 'all',
     metrictype: process.env.AWS_METRICTYPE || 'UnblendedCost'
