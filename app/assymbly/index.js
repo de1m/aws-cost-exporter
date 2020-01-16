@@ -29,6 +29,12 @@ const costByService = new Prometheus.Gauge({
     labelNames: ['type', 'service', 'region', 'unit']
 })
 
+const costRegionByMonth = new Prometheus.Gauge({
+    name: 'cost_region_month',
+    help: 'Cost region per month',
+    labelNames: ['type', 'service', 'region', 'unit']
+})
+
 function metricCollector() { }
 
 //first run and start of cronjob
@@ -70,6 +76,13 @@ var getMetrics = async function () {
     var regionsAllAct = await costExp.getActiveRegions(); //get monthly cost, check active regions
     var serviceAllAct = await costExp.getActiveServices(); //Get monthly cost, check active services
     var allCostDaily = await costExp.getAllCostDaily();
+
+    // console.log('regionsAllAct', regionsAllAct);
+    // console.log('serviceAllAct', JSON.stringify(serviceAllAct));
+    for(var i = 0; i < regionsAllAct.length; i++){
+        var region = regionsAllAct[i];
+        costRegionByMonth.labels('region', 'month', region.region, region.unit).set(parseFloat(region.amount, 10));        
+    }
 
     // cost_all{type="all"} 1655.8311381101
     costAllUSD.labels('all', allCostDaily.ResultsByTime[0].Total[metricConfig.metrictype].Unit).set(parseFloat(allCostDaily.ResultsByTime[0].Total[metricConfig.metrictype].Amount, 10));

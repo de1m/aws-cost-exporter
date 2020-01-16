@@ -40,6 +40,18 @@ cost_service{type="service",service="AWS Key Management Service",region="eu-nort
 cost_service{type="service",service="AWS Key Management Service",region="eu-west-1",unit="USD"} 0.159492
 ...
 ```
+4. Region cost monthly
+```
+...
+cost_region_month{type="region",service="month",region="eu-north-1",unit="USD"} 2144.4543095665
+cost_region_month{type="region",service="month",region="eu-west-2",unit="USD"} 0.0000509429
+cost_region_month{type="region",service="month",region="eu-west-1",unit="USD"} 5349.5967276573
+cost_region_month{type="region",service="month",region="eu-central-1",unit="USD"} 10380.7525458852
+cost_region_month{type="region",service="month",region="us-east-1",unit="USD"} 14.2658663195
+cost_region_month{type="region",service="month",region="us-east-2",unit="USD"} 2.9802420231
+cost_region_month{type="region",service="month",region="us-west-2",unit="USD"} 0.1930107496
+...
+```
 
 # AWS Permissions
 Your user need following permissions
