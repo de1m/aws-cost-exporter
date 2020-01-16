@@ -1,5 +1,4 @@
 const Prometheus = require('prom-client')
-var CronJob = require('cron').CronJob;
 var cron = require('node-cron');
 var config = require('../config');
 var metricConfig = config.getMetricConfig();
