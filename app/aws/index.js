@@ -169,6 +169,66 @@ var checkRegionCost = async function (regionName) {
 }
 
 //get services, where cost in last month was not null
+var getAccounts = function () {
+    var date = new Date();
+    var todayDate = (date.getFullYear() + '-' + (date.getMonth() < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) +
+        '-' + (date.getUTCDate < 10 ? '0' + date.getUTCDate : date.getUTCDate()))
+    var firstDayMonthDate = date.getFullYear() + '-' + (date.getMonth() < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-01'
+
+    var params = {
+        TimePeriod: { /* required */
+            "Start": firstDayMonthDate,
+            "End": todayDate
+        },
+        "Dimension": "LINKED_ACCOUNT"
+    };
+
+    var costexplorer = new AWS.CostExplorer();
+    return new Promise((resolve, reject) => {
+        costexplorer.getDimensionValues(params, function (err, result) {
+            if (err) {
+                reject(err)
+            } else {
+                resolve(result)
+            }
+        })
+    })
+
+}
+
+// //get cost in region last month
+var getAccountCostMonthly = async function (accId) {
+    var date = new Date();
+    var todayDate = (date.getFullYear() + '-' + (date.getMonth() < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) +
+        '-' + (date.getUTCDate < 10 ? '0' + date.getUTCDate : date.getUTCDate()))
+    var firstDayMonthDate = (date.getFullYear() + '-' + (date.getMonth() < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-01')
+
+    var params = {
+        TimePeriod: { /* required */
+            "Start": firstDayMonthDate,
+            "End": todayDate
+        },
+        Granularity: 'MONTHLY',
+        Metrics: [metricConfig.metrictype],
+        Filter: {
+            "Dimensions": {
+                "Key": "LINKED_ACCOUNT",
+                "Values": [accId]
+            }
+        }
+    };
+    return new Promise(async (resolve, reject) => {
+        try {
+            var output = await getAWSCostApi(params);
+            resolve(output);
+        }
+        catch (err) {
+            reject(err);
+        }
+    })
+}
+
+//get services, where cost in last month was not null
 var getServices = function () {
     var date = new Date();
     var todayDate = (date.getFullYear() + '-' + (date.getMonth() < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) +
@@ -331,5 +391,5 @@ var getAWSCostApi = function (params) {
 }
 
 module.exports = {
-    getRegions, checkRegionCost, getCostPerRegionDaily, getActiveRegions, getActiveServices, getCostRegionServiceDaily, getCostPerServiceDaily, getAllCostDaily
+    getRegions, checkRegionCost, getCostPerRegionDaily, getActiveRegions, getActiveServices, getCostRegionServiceDaily, getCostPerServiceDaily, getAllCostDaily,getAccountCostMonthly,getAccounts
 }

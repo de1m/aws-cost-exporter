@@ -1,8 +1,10 @@
 # Description
 
-This is a [prometheus exporter](https://prometheus.io/docs/instrumenting/exporters/) to show daily cost of aws services
+This is a [prometheus exporter](https://prometheus.io/docs/instrumenting/exporters/) to show daily cost of aws services. Also exporter show the region and account cost.   
 
-**WARNING:** It's show only cost for regions and services, where the cost was more then $0  
+**WARNING0:** The region cost don't show the "not region" cost
+
+**WARNING1:** It's show only cost for regions and services, where the cost was more then $0  
 
 **WARNING2**   
 It takes approximately 5 minutes to collect the data(in my case, this is depended on number of active serices and regions), so don't set the cronjob to run more often then 5min. 
@@ -50,6 +52,17 @@ cost_region_month{type="region",service="month",region="eu-central-1",unit="USD"
 cost_region_month{type="region",service="month",region="us-east-1",unit="USD"} 14.2658663195
 cost_region_month{type="region",service="month",region="us-east-2",unit="USD"} 2.9802420231
 cost_region_month{type="region",service="month",region="us-west-2",unit="USD"} 0.1930107496
+...
+```
+5. Account cost monthly
+```
+...
+cost_account_month{type="account",unit="2222",account="USD",description="CICD"} 20.803763436
+cost_account_month{type="account",unit="3333",account="USD",description="Infrastructure"} 364.4863358101
+cost_account_month{type="account",unit="4444",account="USD",description="Integration"} 69.0948979786
+cost_account_month{type="account",unit="5555",account="USD",description="VPN"} 28.4227041386
+cost_account_month{type="account",unit="6666",account="USD",description="Staging"} 0.0000112
+cost_account_month{type="account",unit="8888",account="USD",description="Production"} 0.000015
 ...
 ```
 

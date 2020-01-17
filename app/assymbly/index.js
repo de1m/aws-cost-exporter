@@ -35,6 +35,12 @@ const costRegionByMonth = new Prometheus.Gauge({
     labelNames: ['type', 'service', 'region', 'unit']
 })
 
+const costByAccountMonthly = new Prometheus.Gauge({
+    name: 'cost_account_month',
+    help: 'Cost filtered by account monthly',
+    labelNames: ['type', 'unit','account', 'description']
+})
+
 function metricCollector() { }
 
 //first run and start of cronjob
@@ -72,16 +78,23 @@ metricCollector.prototype.collectMetrics = async function () {
 
 //collect metrics and write they to cache as a prometheus metric
 var getMetrics = async function () {
-
+    
+    var accountAll = await costExp.getAccounts(); //get accounts infos
     var regionsAllAct = await costExp.getActiveRegions(); //get monthly cost, check active regions
     var serviceAllAct = await costExp.getActiveServices(); //Get monthly cost, check active services
     var allCostDaily = await costExp.getAllCostDaily();
 
-    // console.log('regionsAllAct', regionsAllAct);
-    // console.log('serviceAllAct', JSON.stringify(serviceAllAct));
+    //get cost filtered by region
     for(var i = 0; i < regionsAllAct.length; i++){
         var region = regionsAllAct[i];
         costRegionByMonth.labels('region', 'month', region.region, region.unit).set(parseFloat(region.amount, 10));        
+    }
+
+    //get cost filtered by account
+    for (var i= 0; i < accountAll.DimensionValues.length; i++){
+        var account = accountAll.DimensionValues[i]
+        var accountCostMon = await costExp.getAccountCostMonthly(account.Value);
+        costByAccountMonthly.labels('account', accountCostMon.ResultsByTime[0].Total[metricConfig.metrictype].Unit, account.Value, account.Attributes.description).set(parseFloat(accountCostMon.ResultsByTime[0].Total[metricConfig.metrictype].Amount, 10))
     }
 
     // cost_all{type="all"} 1655.8311381101
@@ -212,9 +225,9 @@ var getMetrics = async function () {
     // //set true, if first running was okay
     cached.set('initRun', true);
 
-    //save metric strings into cached
+    // //save metric strings into cached
     cached.set('metrics', Prometheus.register.metrics())
-    logger.debug("Added metrics to prometheus cache");
+    logger.debug("Added metrics to prometheus cache")
 
     return true
 }
