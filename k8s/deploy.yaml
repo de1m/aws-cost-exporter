@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aws-cost-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aws-cost-exporter
+  template:
+    metadata:
+      labels:
+        app: aws-cost-exporter
+    spec:
+      serviceAccountName: aws-cost-explorer
+      containers:
+        - name: aws-cost-exporter
+          image: de1m/aws-cost-exporter:latest
+          imagePullPolicy: Always
+          env:
+          - name: PROVIDER
+            value: AWS
+          - name: DEBUG
+            value: 'true'
+          # run daily at 05:00 
+          - name: CRON
+            value: '00 5 * * *'
+          ports:
+            - name: perf
+              containerPort: 9232
+              protocol: TCP
+          resources:
+            requests:
+              memory: "100Mi"
+              cpu: "100m"
+            limits:
+              memory: "500Mi"
+              cpu: "500m"

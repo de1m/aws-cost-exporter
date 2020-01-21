@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: aws-cost-expoter
+  annotations:
+    prometheus.io/scrape: 'true'
+    prometheus.io/port: '9232'
+spec:
+  ports:
+    - name: perf
+      port: 9232
+      targetPort: 9232
+  selector:
+    app: aws-cost-exporter
