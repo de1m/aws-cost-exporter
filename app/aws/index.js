@@ -55,9 +55,9 @@ var getAllCostDaily = async function () {
     var days = 1;
     var date = new Date();
     var todayDate = date.getFullYear() + '-' + (date.getMonth() < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) +
-        '-' + (date.getUTCDate < 10 ? '0' + date.getUTCDate : date.getUTCDate())
+        '-' + (date.getUTCDate() < 10 ? '0' + date.getUTCDate() : date.getUTCDate())
     var startDay = date.getFullYear() + '-' + (date.getMonth() < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) +
-        '-' + (date.getUTCDate() - days < 10 ? '0' + (date.getUTCDate() - days) : date.getUTCDate() - days)
+        '-' + ((date.getUTCDate() - days) < 10 ? '0' + (date.getUTCDate() - days) : date.getUTCDate() - days)
     logger.debug('Time Period: ' + startDay + ' - ' + todayDate);
     var params = {
         TimePeriod: { /* required */
@@ -136,9 +136,9 @@ var getActiveServices = async function () {
 var checkRegionCost = async function (regionName) {
     var date = new Date();
     var todayDate = (date.getFullYear() + '-' + (date.getMonth() < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) +
-        '-' + (date.getUTCDate < 10 ? '0' + date.getUTCDate : date.getUTCDate()))
+        '-' + (date.getUTCDate() < 10 ? '0' + date.getUTCDate() : date.getUTCDate()))
     var firstDayMonthDate = (date.getFullYear() + '-' + (date.getMonth() < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-01')
-
+    
     var params = {
         TimePeriod: { /* required */
             "Start": firstDayMonthDate,
@@ -172,9 +172,9 @@ var checkRegionCost = async function (regionName) {
 var getAccounts = function () {
     var date = new Date();
     var todayDate = (date.getFullYear() + '-' + (date.getMonth() < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) +
-        '-' + (date.getUTCDate < 10 ? '0' + date.getUTCDate : date.getUTCDate()))
+        '-' + (date.getUTCDate() < 10 ? '0' + date.getUTCDate() : date.getUTCDate()))
     var firstDayMonthDate = date.getFullYear() + '-' + (date.getMonth() < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-01'
-
+    
     var params = {
         TimePeriod: { /* required */
             "Start": firstDayMonthDate,
@@ -200,9 +200,9 @@ var getAccounts = function () {
 var getAccountCostMonthly = async function (accId) {
     var date = new Date();
     var todayDate = (date.getFullYear() + '-' + (date.getMonth() < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) +
-        '-' + (date.getUTCDate < 10 ? '0' + date.getUTCDate : date.getUTCDate()))
+        '-' + (date.getUTCDate() < 10 ? '0' + date.getUTCDate() : date.getUTCDate()))
     var firstDayMonthDate = (date.getFullYear() + '-' + (date.getMonth() < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-01')
-
+    
     var params = {
         TimePeriod: { /* required */
             "Start": firstDayMonthDate,
@@ -232,7 +232,7 @@ var getAccountCostMonthly = async function (accId) {
 var getServices = function () {
     var date = new Date();
     var todayDate = (date.getFullYear() + '-' + (date.getMonth() < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) +
-        '-' + (date.getUTCDate < 10 ? '0' + date.getUTCDate : date.getUTCDate()))
+        '-' + (date.getUTCDate() < 10 ? '0' + date.getUTCDate() : date.getUTCDate()))
     var firstDayMonthDate = date.getFullYear() + '-' + (date.getMonth() < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-01'
 
     var params = {
@@ -261,10 +261,10 @@ var getCostPerRegionDaily = function (regionName) {
     var days = 1;
     var date = new Date();
     var todayDate = date.getFullYear() + '-' + (date.getMonth() < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) +
-        '-' + (date.getUTCDate < 10 ? '0' + date.getUTCDate : date.getUTCDate())
+        '-' + (date.getUTCDate() < 10 ? '0' + date.getUTCDate() : date.getUTCDate())
     var startDay = date.getFullYear() + '-' + (date.getMonth() < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) +
-        '-' + (date.getUTCDate() - days < 10 ? '0' + date.getUTCDate() - days : date.getUTCDate() - days)
-
+        '-' + ((date.getUTCDate() - days) < 10 ? '0' + (date.getUTCDate() - days) : date.getUTCDate() - days)
+    
     var params = {
         TimePeriod: { /* required */
             "Start": startDay,
@@ -298,9 +298,9 @@ var getCostPerServiceDaily = function (service) {
 
     var date = new Date();
     var todayDate = date.getFullYear() + '-' + (date.getMonth() < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) +
-        '-' + (date.getUTCDate < 10 ? '0' + date.getUTCDate : date.getUTCDate())
+        '-' + (date.getUTCDate() < 10 ? '0' + date.getUTCDate() : date.getUTCDate())
     var startDay = date.getFullYear() + '-' + (date.getMonth() < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) +
-        '-' + (date.getUTCDate() - days < 10 ? '0' + date.getUTCDate() - days : date.getUTCDate() - days)
+        '-' + ((date.getUTCDate() - days) < 10 ? '0' + (date.getUTCDate() - days) : date.getUTCDate() - days)
 
     var params = {
         TimePeriod: { /* required */
@@ -333,9 +333,9 @@ var getCostRegionServiceDaily = function (region, service) {
     var days = 1;
     var date = new Date();
     var todayDate = date.getFullYear() + '-' + (date.getMonth() < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) +
-        '-' + (date.getUTCDate < 10 ? '0' + date.getUTCDate : date.getUTCDate())
+        '-' + (date.getUTCDate() < 10 ? '0' + date.getUTCDate() : date.getUTCDate())
     var startDay = date.getFullYear() + '-' + (date.getMonth() < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) +
-        '-' + (date.getUTCDate() - days < 10 ? '0' + date.getUTCDate() - days : date.getUTCDate() - days)
+        '-' + ((date.getUTCDate() - days) < 10 ? '0' + (date.getUTCDate() - days) : date.getUTCDate() - days)
 
     var params = {
         TimePeriod: { /* required */
